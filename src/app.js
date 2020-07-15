@@ -4,7 +4,7 @@ import * as OBJLoader from 'three/examples/jsm/loaders/OBJLoader.js'
 
 function init() {
 
-  let scene, camera, renderer, cube
+  let scene, camera, renderer
   let loader
   const prevcoords = {
     init: false,
@@ -14,7 +14,7 @@ function init() {
   function initialiser() {
 
     scene = new THREE.Scene()
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
 
     // console.log(THREE)
     loader = new OBJLoader.OBJLoader()
@@ -39,6 +39,8 @@ function init() {
         console.log(object)
         object.children.forEach(item => {
           item.material = new THREE.MeshLambertMaterial( { color: 0xffffff } )
+          item.castShadow = true
+          item.receiveShadow = true
         })
 
         scene.add( object )
@@ -56,8 +58,8 @@ function init() {
     scene.add(skyLight)
     // skyLight.position.set()
 
-    camera.position.x = -0.2
-    camera.position.z = 1.8
+    camera.position.x = 0.2
+    camera.position.z = 2.5
     camera.position.y = 0.7
   }
 
@@ -85,8 +87,8 @@ function init() {
     } else {
       const newCoords = [event.clientX, event.clientY]
       const diff = [newCoords[0] - prevcoords.coords[0], newCoords[1] - prevcoords.coords[1]]
-      camera.rotation.x += -(diff[1] / 10000)
-      camera.rotation.y += -(diff[0] / 10000)
+      camera.rotation.x += -(diff[1] / 5000)
+      camera.rotation.y += -(diff[0] / 5000)
       prevcoords.coords = [event.clientX, event.clientY]
     }
 
