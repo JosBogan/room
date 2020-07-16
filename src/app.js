@@ -47,37 +47,37 @@ function init() {
     newLoader.load(
       'assets/1/room2.glb',
       function ( object ) {
-        object.scene.castShadow = true
-        object.scene.receiveShadow = true
-        traverseCastShadow( object.scene )
-        // object.scene.children.forEach(item => {
-        //   if (item.type === 'Mesh') {
-        //     item.castShadow = true
-        //     item.receiveShadow = true
-        //   }
-        // })
+
+        object.scene.traverse( function (item) {
+          if (item instanceof THREE.Mesh) {
+            item.castShadow = true
+            item.receiveShadow = true
+          }
+        } )
+        // traverseCastShadow( object.scene )
+
         console.log(object)
 
         scene.add(object.scene)
       }
     )
 
-    function traverseCastShadow( object ) {
-      // if (object.name === 'Area') {
-      //   object.castShadow = true
-      // }
-      if (object.type === 'Mesh') {
-        object.castShadow = true
-        object.receiveShadow = true
-      }
-      if (object.type === 'Group') {
-        object.children.forEach(item => {
-          // object.castShadow = true
-          // object.receiveShadow = true
-          traverseCastShadow( item )
-        })
-      }
-    }
+    // function traverseCastShadow( object ) {
+    //   // if (object.name === 'Area') {
+    //   //   object.castShadow = true
+    //   // }
+    //   if (object.type === 'Mesh') {
+    //     object.castShadow = true
+    //     object.receiveShadow = true
+    //   }
+    //   if (object.type === 'Group') {
+    //     object.children.forEach(item => {
+    //       // object.castShadow = true
+    //       // object.receiveShadow = true
+    //       traverseCastShadow( item )
+    //     })
+    //   }
+    // }
     
 
     // ! OBJ MATERIAL LOADER
@@ -107,15 +107,16 @@ function init() {
     //   })
 
     //  ! Lights
-    const light = new THREE.SpotLight( 0x404040, 3, 0 ) // soft white light
+    const light = new THREE.SpotLight( 0x404040, 5, 0 ) // soft white light
     light.position.set(6, 2, 5)
     light.castShadow = true
     light.shadow.mapSize.height = 2048 
     light.shadow.mapSize.width = 2048
-    // light.shadow.camera.near = 0.01
-    // light.shadow.camera.far = 200
-    // console.log(light.shadow.getFrustum())
-    light.shadow.bias = -0.0004
+    // light.shadow.camera.top = 100
+    // light.shadow.camera.bottom = 100
+    light.shadow.camera.near = 2
+    light.shadow.camera.far = 500
+    // light.shadow.bias = -0.0004
     scene.add( light )
 
     var spotLightHelper = new THREE.SpotLightHelper( light )
@@ -128,16 +129,16 @@ function init() {
 
 
     // ! Real Camera Position
-    camera.position.x = 0.2
-    camera.position.z = 2
-    camera.position.y = 0.7
+    // camera.position.x = 0.2
+    // camera.position.z = 2
+    // camera.position.y = 0.7
 
     // ! Test CAmera Position
 
-    // camera.position.x = -3
-    // camera.position.z = 3
-    // camera.position.y = 1
-    // camera.rotation.y = -1
+    camera.position.x = -5
+    camera.position.z = 8
+    camera.position.y = 2
+    camera.rotation.y = -0.5
   }
 
   function onWindowResize() {
