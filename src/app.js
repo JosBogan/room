@@ -1,11 +1,17 @@
 import * as THREE from 'three'
+// ! OBJ
 import * as OBJLoader from 'three/examples/jsm/loaders/OBJLoader.js'
-// import GLBLoader from 'three/examples/jsm/loaders/GLTFLoader'
+import * as MTLLoader from 'three/examples/jsm/loaders/MTLLoader.js'
+// ! GLB
+import * as GLTFLoader from 'three/examples/jsm/loaders/GLTFLoader'
 
 function init() {
 
   let scene, camera, renderer
-  let loader
+  // ! OBJ
+  // let loader, materialLoader
+  // ! GLB
+  let newLoader
   const prevcoords = {
     init: false,
     coords: []
@@ -15,46 +21,85 @@ function init() {
 
     scene = new THREE.Scene()
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
+    // camera = new THREE.OrthographicCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
 
-    // console.log(THREE)
-    loader = new OBJLoader.OBJLoader()
-  
+    // ! OBJ
+    // loader = new OBJLoader.OBJLoader()
+    // materialLoader = new MTLLoader.MTLLoader()
+
+    // ! GLB
+    newLoader = new GLTFLoader.GLTFLoader()
+
+    
     // console.log(OBJLoader)
 
     renderer = new THREE.WebGLRenderer( { antialias: true } )
     renderer.setClearColor('gray')
+    renderer.shadowMap.enabled = true
 
 
     renderer.setSize(window.innerWidth, window.innerHeight)
     document.body.appendChild(renderer.domElement)
 
-    // Loading Room
 
-    // const test_material 
-
-    loader.load(
-      'assets/room.obj',
-
+    // GLB LOADER
+    newLoader.load(
+      'assets/1/room.glb',
       function ( object ) {
         console.log(object)
-        object.children.forEach(item => {
-          item.material = new THREE.MeshLambertMaterial( { color: 0xffffff } )
-          item.castShadow = true
-          item.receiveShadow = true
+        object.scene.castShadow = true
+        object.scene.receiveShadow = true
+        object.scene.children.forEach(item => {
+          if (item.type === 'Mesh') {
+            item.castShadow = true
+            item.receiveShadow = true
+          }
         })
 
-        scene.add( object )
+        scene.add(object.scene)
+      }
+    )
     
-      })
+
+    // ! OBJ MATERIAL LOADER
+    // materialLoader.load(
+    //   'assets/2/room.mtl',
+    //   function ( loadedMaterial ) {
+    //     console.log(loadedMaterial)
+    //   }
+    // )
+
+    // ! OBJ Loader
+    // loader.load(
+    //   'assets/2/room.obj',
+
+    //   function ( object ) {
+    //     console.log(object)
 
 
-    console.log(THREE)
+    //     object.children.forEach(item => {
+    //       item.material = new THREE.MeshLambertMaterial( { color: 0xffffff } )
+    //       item.castShadow = true
+    //       item.receiveShadow = true
+    //     })
 
+    //     scene.add( object )
+    
+    //   })
+
+    //  ! Lights
     const light = new THREE.PointLight( 0x404040, 1.4, 1000 ) // soft white light
-    light.position.set(0, 0, 10)
+    light.position.set(0, 20, 10)
     scene.add( light )
 
-    const skyLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6  )
+    // const d = 100
+
+    // light.shadow.camera.left = - d
+    // light.shadow.camera.right = d
+    // light.shadow.camera.top = d
+    // light.shadow.camera.bottom = - d
+
+    const skyLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6 )
     scene.add(skyLight)
     // skyLight.position.set()
 
