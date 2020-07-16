@@ -20,7 +20,7 @@ function init() {
   function initialiser() {
 
     scene = new THREE.Scene()
-    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000)
     // camera = new THREE.OrthographicCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
 
     // ! OBJ
@@ -36,6 +36,7 @@ function init() {
     renderer = new THREE.WebGLRenderer( { antialias: true } )
     renderer.setClearColor('gray')
     renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
 
     renderer.setSize(window.innerWidth, window.innerHeight)
@@ -44,21 +45,39 @@ function init() {
 
     // GLB LOADER
     newLoader.load(
-      'assets/1/room.glb',
+      'assets/1/room2.glb',
       function ( object ) {
-        console.log(object)
         object.scene.castShadow = true
         object.scene.receiveShadow = true
-        object.scene.children.forEach(item => {
-          if (item.type === 'Mesh') {
-            item.castShadow = true
-            item.receiveShadow = true
-          }
-        })
+        traverseCastShadow( object.scene )
+        // object.scene.children.forEach(item => {
+        //   if (item.type === 'Mesh') {
+        //     item.castShadow = true
+        //     item.receiveShadow = true
+        //   }
+        // })
+        console.log(object)
 
         scene.add(object.scene)
       }
     )
+
+    function traverseCastShadow( object ) {
+      // if (object.name === 'Area') {
+      //   object.castShadow = true
+      // }
+      if (object.type === 'Mesh') {
+        object.castShadow = true
+        object.receiveShadow = true
+      }
+      if (object.type === 'Group') {
+        object.children.forEach(item => {
+          // object.castShadow = true
+          // object.receiveShadow = true
+          traverseCastShadow( item )
+        })
+      }
+    }
     
 
     // ! OBJ MATERIAL LOADER
@@ -88,24 +107,37 @@ function init() {
     //   })
 
     //  ! Lights
-    const light = new THREE.PointLight( 0x404040, 1.4, 1000 ) // soft white light
-    light.position.set(0, 20, 10)
+    const light = new THREE.SpotLight( 0x404040, 3, 0 ) // soft white light
+    light.position.set(6, 2, 5)
+    light.castShadow = true
+    light.shadow.mapSize.height = 2048 
+    light.shadow.mapSize.width = 2048
+    // light.shadow.camera.near = 0.01
+    // light.shadow.camera.far = 200
+    // console.log(light.shadow.getFrustum())
+    light.shadow.bias = -0.0004
     scene.add( light )
 
-    // const d = 100
+    var spotLightHelper = new THREE.SpotLightHelper( light )
+    scene.add( spotLightHelper )
 
-    // light.shadow.camera.left = - d
-    // light.shadow.camera.right = d
-    // light.shadow.camera.top = d
-    // light.shadow.camera.bottom = - d
 
-    const skyLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6 )
-    scene.add(skyLight)
+    const skyLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1 )
+    // scene.add(skyLight)
     // skyLight.position.set()
 
+
+    // ! Real Camera Position
     camera.position.x = 0.2
-    camera.position.z = 2.5
+    camera.position.z = 2
     camera.position.y = 0.7
+
+    // ! Test CAmera Position
+
+    // camera.position.x = -3
+    // camera.position.z = 3
+    // camera.position.y = 1
+    // camera.rotation.y = -1
   }
 
   function onWindowResize() {
