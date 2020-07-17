@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 // ! OBJ
-import * as OBJLoader from 'three/examples/jsm/loaders/OBJLoader.js'
-import * as MTLLoader from 'three/examples/jsm/loaders/MTLLoader.js'
+// import * as OBJLoader from 'three/examples/jsm/loaders/OBJLoader.js'
+// import * as MTLLoader from 'three/examples/jsm/loaders/MTLLoader.js'
 // ! GLB
 import * as GLTFLoader from 'three/examples/jsm/loaders/GLTFLoader'
 
@@ -23,9 +23,6 @@ function init() {
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000)
     // camera = new THREE.OrthographicCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
 
-    // ! OBJ
-    // loader = new OBJLoader.OBJLoader()
-    // materialLoader = new MTLLoader.MTLLoader()
 
     // ! GLB
     newLoader = new GLTFLoader.GLTFLoader()
@@ -38,6 +35,12 @@ function init() {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
+    // renderer.toneMapping = THREE.NoToneMapping
+    // renderer.toneMapping = THREE.LinearToneMapping
+    renderer.toneMapping = THREE.ReinhardToneMapping
+    // renderer.toneMapping = THREE.CineonToneMapping
+    // renderer.toneMapping = THREE.ACESFilmicToneMapping
+
 
     renderer.setSize(window.innerWidth, window.innerHeight)
     document.body.appendChild(renderer.domElement)
@@ -45,7 +48,7 @@ function init() {
 
     // GLB LOADER
     newLoader.load(
-      'assets/1/room2.glb',
+      'assets/1/room.glb',
       function ( object ) {
 
         object.scene.traverse( function (item) {
@@ -54,30 +57,12 @@ function init() {
             item.receiveShadow = true
           }
         } )
-        // traverseCastShadow( object.scene )
 
         console.log(object)
 
         scene.add(object.scene)
       }
     )
-
-    // function traverseCastShadow( object ) {
-    //   // if (object.name === 'Area') {
-    //   //   object.castShadow = true
-    //   // }
-    //   if (object.type === 'Mesh') {
-    //     object.castShadow = true
-    //     object.receiveShadow = true
-    //   }
-    //   if (object.type === 'Group') {
-    //     object.children.forEach(item => {
-    //       // object.castShadow = true
-    //       // object.receiveShadow = true
-    //       traverseCastShadow( item )
-    //     })
-    //   }
-    // }
     
 
     // ! OBJ MATERIAL LOADER
@@ -107,8 +92,8 @@ function init() {
     //   })
 
     //  ! Lights
-    const light = new THREE.SpotLight( 0x404040, 5, 0 ) // soft white light
-    light.position.set(6, 2, 5)
+    const light = new THREE.SpotLight( 0x404040, 4, 0 ) // soft white light
+    light.position.set(3.5, 2, 3.5)
     light.castShadow = true
     light.shadow.mapSize.height = 2048 
     light.shadow.mapSize.width = 2048
@@ -123,22 +108,29 @@ function init() {
     scene.add( spotLightHelper )
 
 
-    const skyLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1 )
-    // scene.add(skyLight)
+    const skyLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 4)
+    scene.add(skyLight)
     // skyLight.position.set()
 
 
     // ! Real Camera Position
-    // camera.position.x = 0.2
-    // camera.position.z = 2
-    // camera.position.y = 0.7
+    camera.position.x = 0.2
+    camera.position.z = 2
+    camera.position.y = 0.7
 
     // ! Test CAmera Position
 
-    camera.position.x = -5
-    camera.position.z = 8
-    camera.position.y = 2
-    camera.rotation.y = -0.5
+    // camera.position.x = -5
+    // camera.position.z = 7
+    // camera.position.y = 2
+    // camera.rotation.y = -0.5
+
+    // ! Camera Test 2
+
+    // camera.position.x = -1
+    // camera.position.z = 0
+    // camera.position.y = 2
+    // camera.rotation.x = 5
   }
 
   function onWindowResize() {
