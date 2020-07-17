@@ -4,6 +4,7 @@ import * as THREE from 'three'
 // import * as MTLLoader from 'three/examples/jsm/loaders/MTLLoader.js'
 // ! GLB
 import * as GLTFLoader from 'three/examples/jsm/loaders/GLTFLoader'
+import * as RGBELoader from 'three/examples/jsm/loaders/RGBELoader'
 
 function init() {
 
@@ -12,6 +13,7 @@ function init() {
   // let loader, materialLoader
   // ! GLB
   let newLoader
+  let hdrLoader
   const prevcoords = {
     init: false,
     coords: []
@@ -27,16 +29,16 @@ function init() {
     // ! GLB
     newLoader = new GLTFLoader.GLTFLoader()
 
-    
-    // console.log(OBJLoader)
+    hdrLoader = new RGBELoader.RGBELoader()
+
+
 
     renderer = new THREE.WebGLRenderer( { antialias: true } )
     renderer.setClearColor('gray')
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
-    // renderer.toneMapping = THREE.NoToneMapping
-    // renderer.toneMapping = THREE.LinearToneMapping
+
     renderer.toneMapping = THREE.ReinhardToneMapping
     // renderer.toneMapping = THREE.CineonToneMapping
     // renderer.toneMapping = THREE.ACESFilmicToneMapping
@@ -45,6 +47,27 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight)
     document.body.appendChild(renderer.domElement)
 
+
+    const pmremGenerator = new THREE.PMREMGenerator( renderer )
+    pmremGenerator.compileEquirectangularShader()
+
+    hdrLoader.setDataType( THREE.UnsignedByteType) 
+    hdrLoader.load(
+      'assets/hdri/aero.hdr',
+      function (texture, textureData) {
+        console.log(texture, textureData)
+
+        const envMap = pmremGenerator.fromEquirectangular( texture ).texture
+
+        scene.background = envMap
+        scene.environment = envMap
+
+        texture.dispose()
+        pmremGenerator.dispose()
+            
+        // const material = 
+      }
+    )
 
     // GLB LOADER
     newLoader.load(
@@ -65,32 +88,6 @@ function init() {
     )
     
 
-    // ! OBJ MATERIAL LOADER
-    // materialLoader.load(
-    //   'assets/2/room.mtl',
-    //   function ( loadedMaterial ) {
-    //     console.log(loadedMaterial)
-    //   }
-    // )
-
-    // ! OBJ Loader
-    // loader.load(
-    //   'assets/2/room.obj',
-
-    //   function ( object ) {
-    //     console.log(object)
-
-
-    //     object.children.forEach(item => {
-    //       item.material = new THREE.MeshLambertMaterial( { color: 0xffffff } )
-    //       item.castShadow = true
-    //       item.receiveShadow = true
-    //     })
-
-    //     scene.add( object )
-    
-    //   })
-
     //  ! Lights
     const light = new THREE.SpotLight( 0x404040, 4, 0 ) // soft white light
     light.position.set(3.5, 2, 3.5)
@@ -109,7 +106,7 @@ function init() {
 
 
     const skyLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 4)
-    scene.add(skyLight)
+    // scene.add(skyLight)
     // skyLight.position.set()
 
 
