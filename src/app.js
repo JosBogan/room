@@ -4,9 +4,6 @@ import * as THREE from 'three'
 // import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js'
 // import { EffectComposer } from './jsm/postprocessing/EffectComposer.js'
 
-// ! OBJ
-// import * as OBJLoader from 'three/examples/jsm/loaders/OBJLoader.js'
-// import * as MTLLoader from 'three/examples/jsm/loaders/MTLLoader.js'
 // ! GLB
 import * as GLTFLoader from 'three/examples/jsm/loaders/GLTFLoader'
 import * as RGBELoader from 'three/examples/jsm/loaders/RGBELoader'
@@ -51,10 +48,17 @@ function init() {
 
     // ! OUTLINE END
 
+    const aspectRatio = window.innerWidth / window.innerHeight
+    const viewSize = 3
 
     scene = new THREE.Scene()
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000)
-    // camera = new THREE.OrthographicCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
+    // camera = new THREE.OrthographicCamera( 
+    //   - aspectRatio * viewSize / 2 , 
+    //   aspectRatio * viewSize / 2, 
+    //   viewSize / 2, 
+    //   - viewSize / - 2, 
+    //   5, -5 )
 
 
     // ! GLB
@@ -127,11 +131,6 @@ function init() {
     light.castShadow = true
     light.shadow.mapSize.height = 4096 
     light.shadow.mapSize.width = 4096
-    // light.shadow.camera.top = 100
-    // light.shadow.camera.bottom = 100
-    // light.shadow.camera.near = 2
-    // light.shadow.camera.far = 500
-    // light.shadow.bias = -0.00001
     scene.add( light )
 
     var spotLightHelper = new THREE.SpotLightHelper( light )
@@ -186,20 +185,13 @@ function init() {
 
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1
-    // console.log(scene)
 
     raycaster.setFromCamera(mouse, camera)
 
     const intersects = raycaster.intersectObjects(scene.children[2].children, true)
-    // console.log()
 
-    // if ( intersects.length > 0 ) {
 
-    // } else {
 
-    // outlinePass.selectedObjects = [];
-
-    // }
     console.log(intersects[0].object)
     var edges = new THREE.EdgesGeometry( intersects[0].object.geometry )
     var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x00ffff, linewidth: 10 } ) )
