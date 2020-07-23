@@ -1,4 +1,9 @@
 import * as THREE from 'three'
+
+// import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
+// import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js'
+// import { EffectComposer } from './jsm/postprocessing/EffectComposer.js'
+
 // ! OBJ
 // import * as OBJLoader from 'three/examples/jsm/loaders/OBJLoader.js'
 // import * as MTLLoader from 'three/examples/jsm/loaders/MTLLoader.js'
@@ -18,8 +23,34 @@ function init() {
     init: false,
     coords: []
   }
+  const mouse = new THREE.Vector2()
+  let outlinePass, selectedObjects, composer
+  const raycaster = new THREE.Raycaster()
 
   function initialiser() {
+
+    // ! Outline
+
+    // const params = {
+    //   edgeStrength: 10,
+    //   edgeGlow: 0.0,
+    //   edgeThickness: 1,
+    //   pulsePeriod: 0,
+    //   rotate: false,
+    //   usePatternTexture: false
+    // }
+
+    // composer = new EffectComposer( renderer )
+
+    // var renderPass = new RenderPass( scene, camera )
+    // composer.addPass( renderPass )
+
+    // outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), scene, camera )
+    // composer.addPass( outlinePass )
+
+
+    // ! OUTLINE END
+
 
     scene = new THREE.Scene()
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -39,9 +70,9 @@ function init() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
 
-    renderer.toneMapping = THREE.ReinhardToneMapping
+    // renderer.toneMapping = THREE.ReinhardToneMapping
     // renderer.toneMapping = THREE.CineonToneMapping
-    // renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
 
 
     renderer.setSize(window.innerWidth, window.innerHeight)
@@ -53,7 +84,7 @@ function init() {
 
     hdrLoader.setDataType( THREE.UnsignedByteType) 
     hdrLoader.load(
-      'assets/hdri/aero.hdr',
+      'assets/hdri/photo_studio.hdr',
       function (texture, textureData) {
         console.log(texture, textureData)
 
@@ -65,7 +96,7 @@ function init() {
         texture.dispose()
         pmremGenerator.dispose()
             
-        // const material = 
+
       }
     )
 
@@ -73,11 +104,13 @@ function init() {
     newLoader.load(
       'assets/1/room.glb',
       function ( object ) {
-
         object.scene.traverse( function (item) {
           if (item instanceof THREE.Mesh) {
             item.castShadow = true
             item.receiveShadow = true
+            // var edges = new THREE.EdgesGeometry( item.geometry )
+            // var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) )
+            // scene.add( line )
           }
         } )
 
@@ -92,22 +125,18 @@ function init() {
     const light = new THREE.SpotLight( 0x404040, 4, 0 ) // soft white light
     light.position.set(3.5, 2, 3.5)
     light.castShadow = true
-    light.shadow.mapSize.height = 2048 
-    light.shadow.mapSize.width = 2048
+    light.shadow.mapSize.height = 4096 
+    light.shadow.mapSize.width = 4096
     // light.shadow.camera.top = 100
     // light.shadow.camera.bottom = 100
-    light.shadow.camera.near = 2
-    light.shadow.camera.far = 500
-    // light.shadow.bias = -0.0004
+    // light.shadow.camera.near = 2
+    // light.shadow.camera.far = 500
+    // light.shadow.bias = -0.00001
     scene.add( light )
 
     var spotLightHelper = new THREE.SpotLightHelper( light )
     scene.add( spotLightHelper )
 
-
-    const skyLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 4)
-    // scene.add(skyLight)
-    // skyLight.position.set()
 
 
     // ! Real Camera Position
@@ -138,7 +167,7 @@ function init() {
 
   function animate() {
     requestAnimationFrame(animate)
-
+    // THREE.Raycaster.setFromCamera(mouse)
     // cube.rotation.x += 0.01
     // cube.rotation.y += 0.01
 
@@ -146,8 +175,37 @@ function init() {
 
   }
 
+  function addSelectedObject( object ) {
+
+    selectedObjects = []
+    selectedObjects.push( object )
+
+  }
+
   function mouseMoveEvent(event) {
 
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1
+    // console.log(scene)
+
+    raycaster.setFromCamera(mouse, camera)
+
+    const intersects = raycaster.intersectObjects(scene.children[2].children, true)
+    // console.log()
+
+    // if ( intersects.length > 0 ) {
+
+    // } else {
+
+    // outlinePass.selectedObjects = [];
+
+    // }
+    console.log(intersects[0].object)
+    var edges = new THREE.EdgesGeometry( intersects[0].object.geometry )
+    var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x00ffff, linewidth: 10 } ) )
+    scene.add( line )
+
+    
     if (!prevcoords.init) {
       prevcoords.coords = [event.clientX, event.clientY]
       prevcoords.init = true
