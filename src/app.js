@@ -1,12 +1,14 @@
 import * as THREE from 'three'
 
-// import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
-// import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js'
-// import { EffectComposer } from './jsm/postprocessing/EffectComposer.js'
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js'
 
 // ! GLB
 import * as GLTFLoader from 'three/examples/jsm/loaders/GLTFLoader'
 import * as RGBELoader from 'three/examples/jsm/loaders/RGBELoader'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
 
 function init() {
 
@@ -21,35 +23,12 @@ function init() {
     coords: []
   }
   const mouse = new THREE.Vector2()
-  let outlinePass, selectedObjects, composer
+  let outlinePass, composer, effectFXAA
+  let selectedObjects = []
   const raycaster = new THREE.Raycaster()
 
   function initialiser() {
 
-    // ! Outline
-
-    // const params = {
-    //   edgeStrength: 10,
-    //   edgeGlow: 0.0,
-    //   edgeThickness: 1,
-    //   pulsePeriod: 0,
-    //   rotate: false,
-    //   usePatternTexture: false
-    // }
-
-    // composer = new EffectComposer( renderer )
-
-    // var renderPass = new RenderPass( scene, camera )
-    // composer.addPass( renderPass )
-
-    // outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), scene, camera )
-    // composer.addPass( outlinePass )
-
-
-    // ! OUTLINE END
-
-    const aspectRatio = window.innerWidth / window.innerHeight
-    const viewSize = 3
 
     scene = new THREE.Scene()
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -90,7 +69,6 @@ function init() {
     hdrLoader.load(
       'assets/hdri/photo_studio.hdr',
       function (texture, textureData) {
-        console.log(texture, textureData)
 
         const envMap = pmremGenerator.fromEquirectangular( texture ).texture
 
@@ -106,19 +84,15 @@ function init() {
 
     // GLB LOADER
     newLoader.load(
-      'assets/1/room.glb',
+      'assets/room_named.glb',
       function ( object ) {
         object.scene.traverse( function (item) {
           if (item instanceof THREE.Mesh) {
             item.castShadow = true
             item.receiveShadow = true
-            // var edges = new THREE.EdgesGeometry( item.geometry )
-            // var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) )
-            // scene.add( line )
           }
         } )
 
-        console.log(object)
 
         scene.add(object.scene)
       }
@@ -126,17 +100,17 @@ function init() {
     
 
     //  ! Lights
-    const light = new THREE.SpotLight( 0x404040, 4, 0 ) // soft white light
-    light.position.set(3.5, 2, 3.5)
+    const light = new THREE.SpotLight( 0x404040, 10, 0 ) // soft white light
+    light.position.set(3.5, 2.3, 3.5)
     light.castShadow = true
     light.shadow.mapSize.height = 4096 
     light.shadow.mapSize.width = 4096
+    // light.shadow.radius = 10
+    light.shadow.bias = -0.0004
     scene.add( light )
 
     var spotLightHelper = new THREE.SpotLightHelper( light )
     scene.add( spotLightHelper )
-
-
 
     // ! Real Camera Position
     camera.position.x = 0.2
@@ -156,6 +130,32 @@ function init() {
     // camera.position.z = 0
     // camera.position.y = 2
     // camera.rotation.x = 5
+
+
+    composer = new EffectComposer( renderer )
+
+    const renderPass = new RenderPass( scene, camera )
+    composer.addPass(renderPass)
+
+    outlinePass = new OutlinePass( new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera )
+    outlinePass.edgeStrength = 3
+    outlinePass.edgeThickness = 1
+    outlinePass.visibleEdgeColor.set( '#ffffff' )
+    outlinePass.hiddenEdgeColor.set( '#000000' )
+    composer.addPass(outlinePass)
+
+
+
+
+    effectFXAA = new ShaderPass( FXAAShader )
+
+    const pixelRatio = renderer.getPixelRatio()
+
+    effectFXAA.material.uniforms[ 'resolution' ].value.x = 1 / ( window.innerWidth * pixelRatio )
+    effectFXAA.material.uniforms[ 'resolution' ].value.y = 1 / ( window.innerHeight * pixelRatio )
+    composer.addPass(effectFXAA)
+
+    
   }
 
   function onWindowResize() {
@@ -170,15 +170,16 @@ function init() {
     // cube.rotation.x += 0.01
     // cube.rotation.y += 0.01
 
-    renderer.render(scene, camera)
+    composer.render(scene, camera)
 
   }
 
   function addSelectedObject( object ) {
-
     selectedObjects = []
+    if (object.name.includes('Cube')) {
+      object = object.parent
+    }
     selectedObjects.push( object )
-
   }
 
   function mouseMoveEvent(event) {
@@ -190,13 +191,11 @@ function init() {
 
     const intersects = raycaster.intersectObjects(scene.children[2].children, true)
 
+    if (intersects.length > 0) {
 
-
-    console.log(intersects[0].object)
-    var edges = new THREE.EdgesGeometry( intersects[0].object.geometry )
-    var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x00ffff, linewidth: 10 } ) )
-    scene.add( line )
-
+      addSelectedObject( intersects[0].object )
+      outlinePass.selectedObjects = selectedObjects
+    }
     
     if (!prevcoords.init) {
       prevcoords.coords = [event.clientX, event.clientY]
