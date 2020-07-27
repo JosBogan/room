@@ -32,12 +32,7 @@ function init() {
 
     scene = new THREE.Scene()
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000)
-    // camera = new THREE.OrthographicCamera( 
-    //   - aspectRatio * viewSize / 2 , 
-    //   aspectRatio * viewSize / 2, 
-    //   viewSize / 2, 
-    //   - viewSize / - 2, 
-    //   5, -5 )
+
 
 
     // ! GLB
@@ -53,6 +48,7 @@ function init() {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
 
+    // ! Different ToneMapping
     // renderer.toneMapping = THREE.ReinhardToneMapping
     // renderer.toneMapping = THREE.CineonToneMapping
     renderer.toneMapping = THREE.ACESFilmicToneMapping
@@ -166,9 +162,6 @@ function init() {
 
   function animate() {
     requestAnimationFrame(animate)
-    // THREE.Raycaster.setFromCamera(mouse)
-    // cube.rotation.x += 0.01
-    // cube.rotation.y += 0.01
 
     composer.render(scene, camera)
 
@@ -215,8 +208,7 @@ function init() {
   animate()
   
   window.addEventListener('mousemove', mouseMoveEvent)
-  // window.addEventListener('mousedown', clickEvent)
-  // window.addEventListener('mouseup', clickEvent)
+
   window.addEventListener('resize', onWindowResize, false)
 
 }
