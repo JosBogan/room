@@ -136,7 +136,7 @@ function init() {
     outlinePass = new OutlinePass( new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera )
     outlinePass.edgeStrength = 3
     outlinePass.edgeThickness = 1
-    outlinePass.visibleEdgeColor.set( '#ffffff' )
+    outlinePass.visibleEdgeColor.set( '#ff00ff' )
     outlinePass.hiddenEdgeColor.set( '#000000' )
     composer.addPass(outlinePass)
 
