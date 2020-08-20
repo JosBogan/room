@@ -13,6 +13,11 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
 function init() {
 
   let scene, camera, renderer
+
+  const AspectRatio = window.innerWidth / window.innerHeight
+  const viewsize = 3.6
+
+
   // ! OBJ
   // let loader, materialLoader
   // ! GLB
@@ -27,11 +32,14 @@ function init() {
   let selectedObjects = []
   const raycaster = new THREE.Raycaster()
 
+
   function initialiser() {
 
 
     scene = new THREE.Scene()
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000)
+    // camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000)
+
+    camera = new THREE.OrthographicCamera( viewsize * AspectRatio / - 2, viewsize * AspectRatio / 2, viewsize / 2, viewsize / - 2, -1000, 1000)
 
 
 
@@ -109,9 +117,9 @@ function init() {
     scene.add( spotLightHelper )
 
     // ! Real Camera Position
-    camera.position.x = 0.2
-    camera.position.z = 2
-    camera.position.y = 0.7
+    // camera.position.x = 0.2
+    // camera.position.z = 2
+    // camera.position.y = 0.7
 
     // ! Test CAmera Position
 
@@ -126,6 +134,17 @@ function init() {
     // camera.position.z = 0
     // camera.position.y = 2
     // camera.rotation.x = 5
+
+    // ! Orthographic Camera
+
+    camera.position.z = 1.2
+    camera.position.y = 1
+    // camera.position.x = -1
+    // camera.position.z = 3
+    // camera.rotation.y = -1
+    camera.rotateY(-0.7)
+    camera.rotateX(-0.4)
+    // camera.rotation.x = -0.1
 
 
     composer = new EffectComposer( renderer )
@@ -189,17 +208,19 @@ function init() {
       addSelectedObject( intersects[0].object )
       outlinePass.selectedObjects = selectedObjects
     }
+
+    // ! Camera move
     
-    if (!prevcoords.init) {
-      prevcoords.coords = [event.clientX, event.clientY]
-      prevcoords.init = true
-    } else {
-      const newCoords = [event.clientX, event.clientY]
-      const diff = [newCoords[0] - prevcoords.coords[0], newCoords[1] - prevcoords.coords[1]]
-      camera.rotation.x += -(diff[1] / 5000)
-      camera.rotation.y += -(diff[0] / 5000)
-      prevcoords.coords = [event.clientX, event.clientY]
-    }
+    // if (!prevcoords.init) {
+    //   prevcoords.coords = [event.clientX, event.clientY]
+    //   prevcoords.init = true
+    // } else {
+    //   const newCoords = [event.clientX, event.clientY]
+    //   const diff = [newCoords[0] - prevcoords.coords[0], newCoords[1] - prevcoords.coords[1]]
+    //   camera.rotation.x += -(diff[1] / 5000)
+    //   camera.rotation.y += -(diff[0] / 5000)
+    //   prevcoords.coords = [event.clientX, event.clientY]
+    // }
 
   }
 
