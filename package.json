@@ -7,7 +7,7 @@
     "start": "webpack-dev-server --mode-development"
   },
   "dependencies": {
-    "three": "^0.118.3"
+    "three": "^0.137.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.3",
